@@ -21,9 +21,7 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * Get the validation rules.
      */
     public function rules(): array
     {
@@ -41,7 +39,7 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Attempt to authenticate.
      *
      * @throws ValidationException
      */
@@ -77,6 +75,20 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 $field => trans('auth.failed'),
+            ]);
+
+        }
+
+        // =============================
+        // KIỂM TRA TÀI KHOẢN BỊ KHÓA
+        // =============================
+
+        if (Auth::user()->status === 'Khóa') {
+
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                $field => 'Tài khoản của bạn đã bị khóa.',
             ]);
 
         }

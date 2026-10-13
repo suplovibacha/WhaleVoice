@@ -14,6 +14,7 @@ use Illuminate\Notifications\Notifiable;
     'name',
     'email',
     'role',
+    'status',
     'employee_code',
     'password'
 ])]

@@ -234,30 +234,30 @@
                 Dashboard
             </a>
 
-            <a href="#">
+            <a href="{{ route('admin.accounts.index') }}">
                 <i class="bi bi-people-fill"></i>
-                Người dùng
+                Quản lý tài khoản
             </a>
 
-            <a href="#">
+            <!-- <a href="#">
                 <i class="bi bi-file-earmark-text-fill"></i>
                 Lịch sử
-            </a>
+            </a> -->
 
             <a href="#">
                 <i class="bi bi-mic-fill"></i>
                 Giọng đọc
             </a>
 
-            <a href="#">
+            <!-- <a href="#">
                 <i class="bi bi-bar-chart-fill"></i>
                 Thống kê
-            </a>
+            </a> -->
 
-            <a href="#">
+            <!-- <a href="#">
                 <i class="bi bi-gear-fill"></i>
                 Cài đặt
-            </a>
+            </a> -->
 
             <hr class="text-white">
 

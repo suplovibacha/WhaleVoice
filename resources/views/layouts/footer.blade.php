@@ -95,15 +95,15 @@
                         AI Voice Tiếng Việt
                     </li>
 
-                    <li>
+                    <!-- <li>
                         <i class="bi bi-check-circle-fill me-2"></i>
                         Tải xuống MP3
-                    </li>
+                    </li> -->
 
-                    <li>
+                    <!-- <li>
                         <i class="bi bi-check-circle-fill me-2"></i>
                         Nhiều giọng đọc
-                    </li>
+                    </li> -->
 
                 </ul>
 

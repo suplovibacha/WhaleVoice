@@ -20,17 +20,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-
         *{
             margin:0;
             padding:0;
             box-sizing:border-box;
             font-family:'Manrope',sans-serif;
-        }
-
-        body{
-            background:#F5FBFF;
-            overflow-x:hidden;
         }
 
         :root{
@@ -41,283 +35,194 @@
             --text:#1e293b;
         }
 
+        body{
+            background:#F5FBFF;
+            overflow-x:hidden;
+        }
+
         /* Sidebar */
 
         .sidebar{
-
             position:fixed;
-            left:0;
             top:0;
-
+            left:0;
             width:260px;
             height:100vh;
-
-            background:linear-gradient(180deg,#1976D2,#1565C0);
-
+            background:linear-gradient(180deg,#9ddcff99,#4aa2f9);
             color:#fff;
-
             z-index:999;
-
         }
 
         .logo{
-
-            height:80px;
-
             display:flex;
-            align-items:center;
+            flex-direction:column;
             justify-content:center;
-
-            gap:12px;
-
-            border-bottom:1px solid rgba(255,255,255,.12);
-
+            align-items:center;
+            padding:5px 20px 30px;
+            border-bottom:2px solid rgba(255,255,255,.15);
         }
 
         .logo img{
-
-            width:48px;
-
+            width:200px;
+            margin-bottom:2px;
         }
 
-        .logo h4{
-
+        /* .logo h4{
             margin:0;
+            font-size:24px;
             font-weight:700;
-
-        }
+            color:#fff;
+            letter-spacing:.5px;
+        } */
 
         .menu{
-
             padding:25px 15px;
-
         }
 
         .menu a{
-
             display:flex;
-
             align-items:center;
-
             gap:15px;
-
-            color:white;
-
+            color:#fff;
             text-decoration:none;
-
             padding:14px 18px;
-
             margin-bottom:10px;
-
             border-radius:14px;
-
             transition:.3s;
-
             font-size:16px;
-
         }
 
         .menu a:hover{
-
             background:rgba(255,255,255,.18);
-
         }
 
         .menu i{
-
             font-size:20px;
-
         }
 
         /* Main */
 
         .main{
-
             margin-left:260px;
-
             min-height:100vh;
-
         }
 
-        /* Navbar */
+        /* Topbar */
 
         .topbar{
-
             height:80px;
-
-            background:white;
-
+            background:#fff;
             display:flex;
-
             align-items:center;
-
             justify-content:space-between;
-
             padding:0 35px;
-
             box-shadow:0 5px 20px rgba(0,0,0,.05);
-
         }
 
         .topbar h3{
-
             margin:0;
-
             font-weight:700;
-
             color:#1e293b;
-
         }
 
         .admin-info{
-
             display:flex;
-
             align-items:center;
-
             gap:15px;
-
         }
 
         .admin-info img{
-
             width:42px;
-
             height:42px;
-
             border-radius:50%;
-
         }
 
+        /* Content */
+
         .content{
-
             padding:35px;
-
         }
 
         .card-custom{
-
-            background:white;
-
+            background:#fff;
             border:none;
-
             border-radius:20px;
-
             box-shadow:0 10px 25px rgba(0,0,0,.05);
-
             padding:25px;
-
         }
-
     </style>
 
 </head>
 
 <body>
 
-    <!-- Sidebar -->
+<div class="sidebar">
 
-    <div class="sidebar">
+    <div class="logo">
+        <img src="{{ asset('images/logo_whalevoice_khongnen.png') }}" alt="Logo">
+    </div>
 
-        <div class="logo">
+    <div class="menu">
 
-            <img src="{{ asset('images/logo_whalevoice_khongnen.png') }}">
+        <a href="{{ route('admin.dashboard') }}">
+            <i class="bi bi-grid-fill"></i>
+            Dashboard
+        </a>
 
-            <h4>WhaleVoice</h4>
+        <a href="{{ route('admin.accounts.index') }}">
+            <i class="bi bi-people-fill"></i>
+            Quản lý tài khoản
+        </a>
 
-        </div>
+        <a href="#">
+            <i class="bi bi-mic-fill"></i>
+            Quản lý giọng đọc
+        </a>
 
-        <div class="menu">
+        <hr class="text-white">
 
-            <a href="{{ route('admin.dashboard') }}">
-                <i class="bi bi-grid-fill"></i>
-                Dashboard
-            </a>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
 
-            <a href="{{ route('admin.accounts.index') }}">
-                <i class="bi bi-people-fill"></i>
-                Quản lý tài khoản
-            </a>
+            <button type="submit" class="btn text-white w-100 text-start">
+                <i class="bi bi-box-arrow-right me-2"></i>
+                Đăng xuất
+            </button>
 
-            <!-- <a href="#">
-                <i class="bi bi-file-earmark-text-fill"></i>
-                Lịch sử
-            </a> -->
+        </form>
 
-            <a href="#">
-                <i class="bi bi-mic-fill"></i>
-                Giọng đọc
-            </a>
+    </div>
 
-            <!-- <a href="#">
-                <i class="bi bi-bar-chart-fill"></i>
-                Thống kê
-            </a> -->
+</div>
 
-            <!-- <a href="#">
-                <i class="bi bi-gear-fill"></i>
-                Cài đặt
-            </a> -->
+<div class="main">
 
-            <hr class="text-white">
+    <div class="topbar">
 
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
+        <h3>@yield('title')</h3>
 
-                <button class="btn text-white w-100 text-start">
+        <div class="admin-info">
 
-                    <i class="bi bi-box-arrow-right me-2"></i>
+            <i class="bi bi-bell fs-5"></i>
 
-                    Đăng xuất
+            <span>
+                Xin chào,
+                <strong>{{ auth()->user()->name }}</strong>
+            </span>
 
-                </button>
-
-            </form>
+            <img src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}&background=1976D2&color=fff">
 
         </div>
 
     </div>
 
-    <!-- Main -->
-
-    <div class="main">
-
-        <!-- Navbar -->
-
-        <div class="topbar">
-
-            <h3>@yield('title')</h3>
-
-            <div class="admin-info">
-
-                <i class="bi bi-bell fs-5"></i>
-
-                <span>
-
-                    Xin chào,
-
-                    <strong>{{ auth()->user()->name }}</strong>
-
-                </span>
-
-                <img src="https://ui-avatars.com/api/?name={{ auth()->user()->name }}&background=1976D2&color=fff">
-
-            </div>
-
-        </div>
-
-        <!-- Content -->
-
-        <div class="content">
-
-            @yield('content')
-
-        </div>
-
+    <div class="content">
+        @yield('content')
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
-
 </html>

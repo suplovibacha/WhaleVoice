@@ -53,6 +53,31 @@
                         <div class="mb-4">
 
                             <label class="form-label fw-semibold">
+                                Loại tài khoản
+                            </label>
+
+                            <select
+                                id="role"
+                                name="role"
+                                class="form-control">
+
+                                <option value="Người dùng">
+                                    Người dùng
+                                </option>
+
+                                <option value="Nhân viên">
+                                    Nhân viên
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- Email -->
+
+                        <div class="mb-4" id="emailBox">
+
+                            <label class="form-label fw-semibold">
                                 Email
                             </label>
 
@@ -64,6 +89,27 @@
                                 placeholder="Nhập email">
 
                             @error('email')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+
+                        </div>
+
+                        <!-- Mã nhân viên -->
+
+                        <div class="mb-4 d-none" id="employeeBox">
+
+                            <label class="form-label fw-semibold">
+                                Mã nhân viên
+                            </label>
+
+                            <input
+                                type="text"
+                                name="employee_code"
+                                value="{{ old('employee_code') }}"
+                                class="form-control"
+                                placeholder="Nhập mã nhân viên">
+
+                            @error('employee_code')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
 
@@ -147,6 +193,37 @@
 
 </section>
 
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const role = document.getElementById("role");
+    const emailBox = document.getElementById("emailBox");
+    const employeeBox = document.getElementById("employeeBox");
+
+    function changeLoginType() {
+
+        if (role.value === "Nhân viên") {
+
+            emailBox.classList.add("d-none");
+            employeeBox.classList.remove("d-none");
+
+        } else {
+
+            emailBox.classList.remove("d-none");
+            employeeBox.classList.add("d-none");
+
+        }
+
+    }
+
+    changeLoginType();
+
+    role.addEventListener("change", changeLoginType);
+
+});
+
+</script>
 @endsection
 
 <style>

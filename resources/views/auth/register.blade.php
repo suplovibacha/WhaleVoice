@@ -75,6 +75,37 @@
                         <div class="mb-3">
 
                             <label class="form-label fw-semibold">
+                                Loại tài khoản
+                            </label>
+
+                            <select
+                                name="role"
+                                id="role"
+                                class="form-control">
+
+                                <option value="Người dùng">Người dùng</option>
+                                <option value="Nhân viên">Nhân viên</option>
+
+                            </select>
+                        </div>
+
+                        <div class="mb-3 d-none" id="employeeBox">
+
+                            <label class="form-label fw-semibold">
+                                Mã nhân viên
+                            </label>
+
+                            <input
+                                type="text"
+                                name="employee_code"
+                                class="form-control"
+                                placeholder="Nhập mã nhân viên">
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
                                 Email
                             </label>
 
@@ -171,6 +202,30 @@
 </section>
 
 @endsection
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const role = document.getElementById("role");
+    const employeeBox = document.getElementById("employeeBox");
+
+    function toggleEmployeeBox() {
+
+        if (role.value === "Nhân viên") {
+            employeeBox.classList.remove("d-none");
+        } else {
+            employeeBox.classList.add("d-none");
+        }
+
+    }
+
+    toggleEmployeeBox();
+
+    role.addEventListener("change", toggleEmployeeBox);
+
+});
+</script>
+
 <style>
 
 .register-page{

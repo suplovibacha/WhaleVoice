@@ -52,7 +52,7 @@
 
                             <li>
                                 <a class="dropdown-item" href="{{ route('dashboard') }}">
-                                    Dashboard
+                                    Trang cá nhân
                                 </a>
                             </li>
 

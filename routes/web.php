@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -27,10 +27,15 @@ Route::get('/contact', function () {
 })->name('contact');
 
 // trang admin
+Route::get('/admin', function () {
+    return view('admin.dashboard');
+})->name('admin.dashboard');
+
+// dashboard
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/admin', function () {
         return view('admin.dashboard');
-    })->name('dashboard');
+    })->name('admin.dashboard');
 
 });

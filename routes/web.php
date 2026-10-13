@@ -3,9 +3,6 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -18,3 +15,22 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// trang chủ
+Route::get('/', function () {
+    return view('home');
+})->name('home');
+
+// trang lien he
+Route::get('/contact', function () {
+    return view('contact');
+})->name('contact');
+
+// trang admin
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/admin', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+
+});

@@ -174,9 +174,9 @@
             Quản lý tài khoản
         </a>
 
-        <a href="#">
-            <i class="bi bi-mic-fill"></i>
-            Quản lý giọng đọc
+        <a href="{{ route('admin.audio-dictionary.index') }}">
+            <i class="bi bi-collection-play-fill"></i>
+            Từ điển âm thanh
         </a>
 
         <hr class="text-white">

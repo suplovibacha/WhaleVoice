@@ -3,11 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\AudioDictionaryController;
 
+// trang chủ
 Route::get('/', function () {
     return view('home');
 })->name('home');
 
+// trang liên hệ
 Route::get('/contact', function () {
     return view('contact');
 })->name('contact');
@@ -45,4 +48,13 @@ Route::patch(
     [AccountController::class, 'toggleStatus']
 )->name('admin.accounts.toggleStatus');
 
+// trang quản lý từ điển âm thanh admin
+Route::resource('audio-dictionary', AudioDictionaryController::class)
+    ->names('admin.audio-dictionary');
+
+// update status audio
+Route::post(
+    'audio-dictionary/{audioDictionary}/toggle-status',
+    [AudioDictionaryController::class, 'toggleStatus']
+)->name('admin.audio-dictionary.toggle-status');
 require __DIR__.'/auth.php';

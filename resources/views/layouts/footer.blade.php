@@ -60,10 +60,9 @@
                         </a>
                     </li>
 
-                    <li>
-                        <a href="#huongdan">
-                            <i class="bi bi-book-fill me-2"></i>
-                            Hướng dẫn
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('dictionary.index') }}">
+                            Từ điển
                         </a>
                     </li>
 

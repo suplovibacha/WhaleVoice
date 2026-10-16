@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\AudioDictionaryController;
+use App\Http\Controllers\DictionaryController;
 
 // trang chủ
 Route::get('/', function () {
@@ -52,9 +53,31 @@ Route::patch(
 Route::resource('audio-dictionary', AudioDictionaryController::class)
     ->names('admin.audio-dictionary');
 
-// update status audio
+// update status audio admin
 Route::post(
     'audio-dictionary/{audioDictionary}/toggle-status',
     [AudioDictionaryController::class, 'toggleStatus']
 )->name('admin.audio-dictionary.toggle-status');
+
+Route::get('/dictionary', [DictionaryController::class, 'index'])
+    ->name('dictionary.index');
+
+// import file excel
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware('auth')
+    ->group(function () {
+
+        Route::resource('audio-dictionary', AudioDictionaryController::class);
+
+        Route::post(
+            'audio-dictionary/import',
+            [AudioDictionaryController::class,'import']
+        )->name('audio-dictionary.import');
+
+        Route::post(
+            'audio-dictionary/{audioDictionary}/toggle-status',
+            [AudioDictionaryController::class,'toggleStatus']
+        )->name('audio-dictionary.toggle-status');
+});
 require __DIR__.'/auth.php';

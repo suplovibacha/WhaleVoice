@@ -30,8 +30,8 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        Hướng dẫn
+                    <a class="nav-link" href="{{ route('dictionary.index') }}">
+                        Từ điển
                     </a>
                 </li>
 

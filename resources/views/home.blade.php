@@ -18,7 +18,7 @@
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <style>
+<style>
     *{
         margin:0;
         padding:0;
@@ -300,21 +300,14 @@
 
 <body>
 @include('layouts.navigation')
-
 <section class="hero">
-
     <div class="container">
-
         <div class="text-center">
-
             <div class="position-relative d-inline-block mb-4">
 
                 <div class="circle1"></div>
-
                 <div class="circle2"></div>
-
-                <img src="{{ asset('images/logo_whalevoice_khongnen.png') }}"
-                     class="hero-logo">
+                <img src="{{ asset('images/logo_whalevoice_khongnen.png') }}" class="hero-logo">
 
             </div>
 
@@ -323,111 +316,177 @@
                 <span>giọng nói</span>
             </h1>
 
-            <p class="mx-auto" style="max-width:700px;">
+            <p class="mx-auto text-secondary" style="max-width:700px;">
                 WhaleVoice giúp chuyển đổi văn bản thành giọng nói tiếng Việt
                 nhanh chóng, tự nhiên và dễ sử dụng.
             </p>
 
-        </div>
+            <div class="d-flex justify-content-center flex-wrap gap-4 mt-5">
 
+                <!-- Khách -->
+
+                <div class="card border-0 shadow-sm rounded-4 p-4" style="width:300px;">
+
+                    <div class="text-center mb-3">
+                        <i class="bi bi-person-circle fs-1 text-primary"></i>
+                        <h5 class="fw-bold mt-2 mb-0">Khách</h5>
+                    </div>
+
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">✅ Tối đa <b>5 lượt/ngày</b></li>
+                        <li class="mb-2">✅ Nghe thử âm thanh</li>
+                        <li class="mb-2 text-danger">❌ Không tải file</li>
+                        <li class="text-danger">❌ Không lưu lịch sử</li>
+                    </ul>
+
+                </div>
+
+                <!-- Thành viên -->
+
+                <div class="card border-0 shadow rounded-4 p-4 position-relative"
+                     style="width:320px;">
+
+                    <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-primary px-3 py-2">
+                        Miễn phí
+                    </span>
+
+                    <div class="text-center mb-3">
+                        <i class="bi bi-stars fs-1 text-warning"></i>
+                        <h5 class="fw-bold mt-2 mb-0">Thành viên WhaleVoice</h5>
+                    </div>
+
+                    <ul class="list-unstyled">
+                        <li class="mb-2">✅ Chuyển đổi không giới hạn</li>
+                        <li class="mb-2">✅ Tải file WAV</li>
+                        <li class="mb-2">✅ Lưu lịch sử chuyển đổi</li>
+                        <li>✅ Đồng bộ dữ liệu</li>
+                    </ul>
+
+                    @guest
+                        <a href="{{ route('register') }}"class="btn btn-primary rounded-pill mt-3">
+                            Đăng ký miễn phí
+                        </a>
+                    @endguest
+                </div>
+            </div>
+        </div>
         <div class="hero-card mx-auto mt-5" style="max-width:1500px;">
+
+            @guest
+                <div class="alert alert-warning rounded-4">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Bạn đang sử dụng với quyền <b>Khách</b>.
+                    Mỗi ngày chỉ được chuyển đổi tối đa <b>5 lần</b>.
+                    Đăng ký để sử dụng không giới hạn.
+                </div>
+            @endguest
 
             <textarea
                 id="textInput"
                 class="form-control"
                 rows="12"
-                placeholder="Nhập văn bản..."></textarea>
+                placeholder="Hãy nhập văn bản để bắt đầu chuyển đổi thành giọng nói..."></textarea>
+
+            <small class="text-muted mt-2 d-block">
+                <i class="bi bi-lightbulb"></i>
+                @guest
+                    Khách chỉ được chuyển đổi tối đa 5 lần mỗi ngày.
+                @else
+                    Bạn có thể chuyển đổi không giới hạn và tải file sau khi hoàn thành.
+                @endguest
+            </small>
 
             <div class="row mt-4">
 
                 <!-- Thống kê -->
                 <div class="col-md-4">
-
-                    <!-- <label class="fw-semibold mb-2">
-                        Thống kê văn bản
-                    </label> -->
-
                     <div class="border rounded-4 p-3 bg-light h-100">
-
                         <div class="d-flex justify-content-between mb-2">
-
                             <span>Số từ</span>
-
                             <strong id="wordCount">0</strong>
-
                         </div>
 
                         <div class="d-flex justify-content-between">
-
                             <span>Thời gian đọc</span>
-
                             <strong id="readTime">0 giây</strong>
-
                         </div>
-
                     </div>
-
                 </div>
 
                 <!-- Định dạng -->
-                <div class="col-md-4">
 
+                <div class="col-md-4">
                     <label class="fw-semibold mb-2">
                         Định dạng âm thanh
                     </label>
-
                     <select class="form-select">
                         <option>WAV</option>
                     </select>
-
                 </div>
 
-                <!-- Nút -->
                 <div class="col-md-4 d-flex align-items-end">
-
-                    <button class="btn btn-convert w-100">
-                        <i class="bi bi-volume-up-fill me-2"></i>
-                        Chuyển đổi
-                    </button>
-
+                    @guest
+                        <button
+                            id="convertBtn"
+                            class="btn btn-convert w-100">
+                            <i class="bi bi-volume-up-fill me-2"></i>
+                            Chuyển đổi (5 lượt/ngày)
+                        </button>
+                    @else
+                        <button
+                            id="convertBtn"
+                            class="btn btn-convert w-100">
+                            <i class="bi bi-volume-up-fill me-2"></i>
+                            Chuyển đổi
+                        </button>
+                    @endguest
                 </div>
-
             </div>
-
         </div>
+        <div class="hero-card mx-auto mt-4 d-none" id="resultBox" style="max-width:1500px;">
 
-    </div>
+            <h4 class="fw-bold mb-4">
+                <i class="bi bi-music-note-beamed me-2"></i>
+                Kết quả chuyển đổi
+            </h4>
 
-</section>
+            <audio id="resultAudio" controls style="width:100%;">
+                Trình duyệt không hỗ trợ phát âm thanh.
+            </audio>
 
-<!-- <section class="container my-5">
-    <div class="hero-card">
-        <h3 class="mb-4">
-            Kết quả chuyển đổi
-        </h3>
-        <audio controls class="w-100">
-            <source src="" type="audio/wav">
-        </audio>
-        <div class="row mt-4">
-            <div class="col-md-6 d-grid">
-                <button class="btn btn-success">
-                    <i class="bi bi-download me-2"></i>
-                    Tải xuống
-                </button>
-            </div>
-            <div class="col-md-6 d-grid">
-                <button class="btn btn-outline-primary">
-                    <i class="bi bi-arrow-clockwise me-2"></i>
+            <div class="d-flex gap-3 mt-4">
+                @auth
+                    <a
+                        id="downloadBtn"
+                        href="#"
+                        download
+                        class="btn btn-success">
+                        <i class="bi bi-download me-2"></i>
+                        Tải xuống
+                    </a>
+                @else
+                    <button
+                        class="btn btn-success"
+                        disabled>
+                        <i class="bi bi-download me-2"></i>
+                        Đăng nhập để tải
+                    </button>
+                @endauth
+
+                <button
+                    class="btn btn-outline-primary"
+                    onclick="document.getElementById('textInput').focus()">
+                    <i class="bi bi-arrow-repeat me-2"></i>
                     Chuyển đổi lại
                 </button>
             </div>
         </div>
     </div>
-</section> -->
+</section>
 @include('layouts.footer')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const textInput = document.getElementById("textInput");
@@ -438,41 +497,49 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const text = textInput.value.trim();
 
-        if(text === ""){
-            wordCount.innerHTML = 0;
-            readTime.innerHTML = "0 giây";
+        if(text===""){
+            wordCount.innerHTML=0;
+            readTime.innerHTML="0 giây";
             return;
         }
 
-        // Đếm số từ
-        const words = text.split(/\s+/).filter(word => word.length > 0);
+        const words=text.split(/\s+/).filter(word=>word.length>0);
 
-        wordCount.innerHTML = words.length;
+        wordCount.innerHTML=words.length;
 
-        // Ước tính đọc 150 từ/phút
-        const minutes = words.length / 150;
+        const minutes=words.length/150;
 
-        if(minutes < 1){
-
-            readTime.innerHTML = Math.ceil(minutes * 60) + " giây";
-
+        if(minutes<1){
+            readTime.innerHTML=Math.ceil(minutes*60)+" giây";
         }else{
+            const min=Math.floor(minutes);
+            const sec=Math.round((minutes-min)*60);
 
-            const min = Math.floor(minutes);
-            const sec = Math.round((minutes - min) * 60);
-
-            readTime.innerHTML = min + " phút " + sec + " giây";
-
+            readTime.innerHTML=min+" phút "+sec+" giây";
         }
-
     }
 
-    textInput.addEventListener("input", updateStats);
-
+    textInput.addEventListener("input",updateStats);
     updateStats();
 
+    const convertBtn = document.getElementById("convertBtn");
+
+    convertBtn.addEventListener("click", function () {
+
+        const demoAudio = "{{ asset('storage/audio/demo.wav') }}";
+        document.getElementById("resultAudio").src = demoAudio;
+
+        @auth
+            document.getElementById("downloadBtn").href = demoAudio;
+        @endauth
+
+        document.getElementById("resultBox").classList.remove("d-none");
+        document.getElementById("resultBox").scrollIntoView({
+            behavior: "smooth"
+        });
+    });
 });
+
 </script>
 </body>
-
 </html>

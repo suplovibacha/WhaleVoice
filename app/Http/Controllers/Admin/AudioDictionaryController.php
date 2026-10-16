@@ -158,4 +158,12 @@ class AudioDictionaryController extends Controller
             'Đã cập nhật trạng thái.'
         );
     }
+    // import file excel
+    public function import(Request $request)
+    {
+        return back()->with(
+            'success',
+            'Chức năng import Excel đang được phát triển.'
+        );
+    }
 }

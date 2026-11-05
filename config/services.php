@@ -34,5 +34,13 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'firebase' => [
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'credentials' => env('FIREBASE_CREDENTIALS'),
+    ],
+    'supabase' => [
+    'url' => env('SUPABASE_URL'),
+    'bucket' => env('SUPABASE_BUCKET'),
+],
 
 ];

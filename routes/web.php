@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\AudioDictionaryController;
 use App\Http\Controllers\DictionaryController;
+use App\Http\Controllers\LocalAudioController;
 
 // Trang chủ
 Route::get('/', function () {
@@ -19,6 +20,9 @@ Route::get('/contact', function () {
 // Từ điển
 Route::get('/dictionary', [DictionaryController::class, 'index'])
     ->name('dictionary.index');
+// Phát âm thanh từ thư mục WAV local
+Route::get('/audio/local', [LocalAudioController::class, 'show'])
+    ->name('audio.local');
 
 // Các trang yêu cầu đăng nhập
 Route::middleware('auth')->group(function () {

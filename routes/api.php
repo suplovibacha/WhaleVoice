@@ -31,26 +31,20 @@ Route::get('/test-firestore', function (FirestoreService $firestore) {
     }
 });
 
-use App\Services\SupabaseStorageService;
+
 
 Route::post('/tts/convert', function (
     Request $request,
     FirestoreService $firestore,
-    SupabaseStorageService $supabase,
     AudioMergeService $audioMerge
 ) {
     $request->validate([
         'text' => ['required', 'string', 'max:2000'],
     ]);
 
-    $tempDirectory = storage_path('app/tts');
-
     try {
         set_time_limit(120);
 
-        Log::info('TTS REQUEST START', [
-            'max_execution_time' => ini_get('max_execution_time'),
-        ]);
         $text = trim($request->input('text'));
 
         $tokens = preg_split(
@@ -60,21 +54,8 @@ Route::post('/tts/convert', function (
             PREG_SPLIT_NO_EMPTY
         );
 
-        $allWords = collect($firestore->getAllWords());
-
-        $wordMap = $allWords->keyBy(function ($item) {
-            return mb_strtolower(
-                trim($item['word'] ?? ''),
-                'UTF-8'
-            );
-        });
-
-        $inputFiles = [];
-        $missing = [];
-        $matchedWords = [];
-
-        $jobId = (string) Str::uuid();
-        $jobDirectory = $tempDirectory . '/' . $jobId;
+        // Làm sạch dấu câu và chuẩn hóa từ.
+        $tokenWords = [];
 
         foreach ($tokens as $token) {
             $word = preg_replace(
@@ -83,34 +64,107 @@ Route::post('/tts/convert', function (
                 $token
             );
 
-            if ($word === '') {
-                continue;
+            if ($word !== '') {
+                $tokenWords[] = mb_strtolower($word, 'UTF-8');
             }
+        }
 
-            $key = mb_strtolower($word, 'UTF-8');
+        // Chỉ truy vấn những từ người dùng nhập.
+        $allWords = $firestore->getWordsByWords($tokenWords);
 
-            if (!$wordMap->has($key)) {
+        $wordMap = collect($allWords)->keyBy(function ($item) {
+            return mb_strtolower(
+                trim($item['word'] ?? ''),
+                'UTF-8'
+            );
+        });
+
+        // Thư mục WAV gốc trên máy tính.
+        $root = realpath(config('services.audio.local_root'));
+
+        if ($root === false) {
+            throw new RuntimeException(
+                'Không tìm thấy thư mục WAV local.'
+            );
+        }
+
+        // Ánh xạ tên thư mục Firestore về tên thư mục local.
+        $folderMappings = [
+            'A_BREVE' => 'Ă',
+            'A_CIRCUMFLEX' => 'Â',
+            'D_STROKE' => 'Đ',
+            'E_CIRCUMFLEX' => 'Ê',
+            'O_CIRCUMFLEX' => 'Ô',
+            'O_HORN' => 'Ơ',
+            'U_HORN' => 'Ư',
+        ];
+
+        $inputFiles = [];
+        $missing = [];
+        $matchedWords = [];
+
+        foreach ($tokenWords as $word) {
+            if (!$wordMap->has($word)) {
                 $missing[] = $word;
                 continue;
             }
 
-            $item = $wordMap->get($key);
-            $storagePath = $item['storagePath'] ?? '';
-
-            if ($storagePath === '') {
-                $missing[] = $word;
-                continue;
-            }
-
-            $localFile = $jobDirectory . '/' .
-                count($inputFiles) . '.wav';
-
-            $supabase->downloadToLocal(
-                $storagePath,
-                $localFile
+            $item = $wordMap->get($word);
+            $storagePath = str_replace(
+                '\\',
+                '/',
+                trim($item['storagePath'] ?? '')
             );
 
-            $inputFiles[] = $localFile;
+            if (
+                $storagePath === '' ||
+                str_contains($storagePath, '..') ||
+                str_starts_with($storagePath, '/') ||
+                str_contains($storagePath, ':')
+            ) {
+                $missing[] = $word;
+                continue;
+            }
+
+            $parts = explode('/', $storagePath);
+
+            if (count($parts) !== 2) {
+                $missing[] = $word;
+                continue;
+            }
+
+            $parts[0] = $folderMappings[$parts[0]] ?? $parts[0];
+
+            if (
+                strtolower(pathinfo($parts[1], PATHINFO_EXTENSION))
+                !== 'wav'
+            ) {
+                $missing[] = $word;
+                continue;
+            }
+
+            $sourceFile = realpath(
+                $root . DIRECTORY_SEPARATOR .
+                implode(DIRECTORY_SEPARATOR, $parts)
+            );
+
+            $rootPrefix = rtrim($root, DIRECTORY_SEPARATOR)
+                . DIRECTORY_SEPARATOR;
+
+            if (
+                $sourceFile === false ||
+                !str_starts_with(
+                    strtolower($sourceFile),
+                    strtolower($rootPrefix)
+                ) ||
+                !is_file($sourceFile)
+            ) {
+                $missing[] = $word;
+                continue;
+            }
+
+            // Sử dụng trực tiếp WAV gốc, không tải từ Supabase.
+            $inputFiles[] = $sourceFile;
             $matchedWords[] = $word;
         }
 
@@ -123,29 +177,43 @@ Route::post('/tts/convert', function (
             ]);
         }
 
+        // Tạo thư mục lưu file WAV sau khi ghép.
+        $jobId = (string) Str::uuid();
+        $jobDirectory = storage_path('app/tts/' . $jobId);
+
+        if (
+            !is_dir($jobDirectory) &&
+            !mkdir($jobDirectory, 0775, true)
+        ) {
+            throw new RuntimeException(
+                'Không thể tạo thư mục lưu âm thanh.'
+            );
+        }
+
         $outputFile = $jobDirectory . '/merged.wav';
 
+        // Ghép các file WAV local.
         $audioMerge->merge(
             $inputFiles,
             $outputFile
         );
-        Log::info('TTS MERGE CHECK', [
-            'outputFile' => $outputFile,
-            'exists' => file_exists($outputFile),
-            'size' => file_exists($outputFile)
-                ? filesize($outputFile)
-                : null,
-        ]);
-        $handle = fopen($outputFile, 'rb');
-        $firstBytes = bin2hex(fread($handle, 8));
-        fclose($handle);
 
-        Log::info('TTS WAV BYTE CHECK', [
-            'first_bytes' => $firstBytes,
-            'output_buffer_level' => ob_get_level(),
-            'output_buffer_contents' => ob_get_contents(),
+        if (
+            !file_exists($outputFile) ||
+            filesize($outputFile) === 0
+        ) {
+            throw new RuntimeException(
+                'File WAV sau khi ghép không hợp lệ.'
+            );
+        }
+
+        Log::info('TTS LOCAL MERGE SUCCESS', [
+            'total' => count($inputFiles),
+            'matched_words' => $matchedWords,
+            'missing' => $missing,
+            'output_size' => filesize($outputFile),
         ]);
-        // Xóa dữ liệu thừa trong output buffer trước khi trả file WAV.
+
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
@@ -157,6 +225,7 @@ Route::post('/tts/convert', function (
                 'Content-Type' => 'audio/wav',
             ]
         );
+
     } catch (\Throwable $e) {
         report($e);
 
@@ -167,3 +236,4 @@ Route::post('/tts/convert', function (
         ], 500);
     }
 });
+

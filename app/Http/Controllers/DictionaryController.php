@@ -3,24 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Services\FirestoreService;
-use App\Services\SupabaseStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class DictionaryController extends Controller
 {
     private FirestoreService $firestore;
-    private SupabaseStorageService $supabase;
 
-    public function __construct(
-        FirestoreService $firestore,
-        SupabaseStorageService $supabase
-    ) {
+    public function __construct(FirestoreService $firestore)
+    {
         $this->firestore = $firestore;
-        $this->supabase = $supabase;
     }
-
-
 
     public function index(Request $request)
     {
@@ -60,10 +53,12 @@ class DictionaryController extends Controller
         // 5. Sắp xếp từ vựng
         $words = $words->sortBy('word')->values();
 
-        // 6. Tạo URL âm thanh từ Supabase
+        // 6. Tạo URL âm thanh từ file WAV local
         $words = $words->map(function ($item) {
             $item['audio_url'] = !empty($item['storagePath'])
-                ? $this->supabase->getPublicUrl($item['storagePath'])
+                ? route('audio.local', [
+                    'path' => $item['storagePath']
+                ])
                 : null;
 
             return $item;

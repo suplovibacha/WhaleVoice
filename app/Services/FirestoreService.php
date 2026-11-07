@@ -69,8 +69,14 @@ class FirestoreService
         $url = "{$this->baseUrl}/{$collection}/{$documentId}";
 
         $response = Http::withToken($this->getAccessToken())
+            ->connectTimeout(30)
+            ->timeout(60)
+            ->retry(
+                3,
+                1000,
+                fn($exception) => $exception instanceof \Illuminate\Http\Client\ConnectionException
+            )
             ->get($url);
-
         if (!$response->successful()) {
             throw new RuntimeException(
                 'Firestore request failed: ' . $response->body()
@@ -83,7 +89,15 @@ class FirestoreService
     {
         $url = "{$this->baseUrl}/{$collection}/{$documentId}";
 
-        $response = Http::withToken($this->getAccessToken())->get($url);
+        $response = Http::withToken($this->getAccessToken())
+            ->connectTimeout(30)
+            ->timeout(60)
+            ->retry(
+                3,
+                1000,
+                fn($exception) => $exception instanceof \Illuminate\Http\Client\ConnectionException
+            )
+            ->get($url);
 
         if ($response->status() === 404) {
             return null;
@@ -158,6 +172,209 @@ class FirestoreService
             }
         );
     }
+
+    /**
+     * Truy vấn các document theo danh sách storagePath.
+     * Mỗi lần truy vấn tối đa 30 đường dẫn.
+     * Kết quả được nhóm theo storagePath để phát hiện trùng.
+     */
+    public function getWordsByStoragePaths(array $storagePaths): array
+    {
+        $storagePaths = array_values(array_unique(array_filter(
+            $storagePaths,
+            fn($path) => is_string($path) && trim($path) !== ''
+        )));
+
+        if (empty($storagePaths)) {
+            return [];
+        }
+
+        // Chỉ lấy access token một lần cho toàn bộ quá trình.
+        $accessToken = $this->getAccessToken();
+
+        $url = "{$this->baseUrl}:runQuery";
+        $results = [];
+
+        // Firestore IN filter hỗ trợ tối đa 30 giá trị.
+        foreach (array_chunk($storagePaths, 30) as $chunk) {
+            $values = array_map(
+                fn($path) => ['stringValue' => $path],
+                $chunk
+            );
+
+            $body = [
+                'structuredQuery' => [
+                    'from' => [
+                        ['collectionId' => 'words'],
+                    ],
+                    'where' => [
+                        'fieldFilter' => [
+                            'field' => [
+                                'fieldPath' => 'storagePath',
+                            ],
+                            'op' => 'IN',
+                            'value' => [
+                                'arrayValue' => [
+                                    'values' => $values,
+                                ],
+                            ],
+                        ],
+                    ],
+                    'select' => [
+                        'fields' => [
+                            ['fieldPath' => 'word'],
+                            ['fieldPath' => 'letter'],
+                            ['fieldPath' => 'fileName'],
+                            ['fieldPath' => 'storagePath'],
+                        ],
+                    ],
+                ],
+            ];
+
+            $response = Http::withToken($accessToken)
+                ->connectTimeout(30)
+                ->timeout(60)
+                ->withOptions([
+                    'force_ip_resolve' => 'v4',
+                ])
+                ->post($url, $body);
+
+            if (!$response->successful()) {
+                throw new RuntimeException(
+                    'Firestore query failed: ' . $response->body()
+                );
+            }
+
+            foreach ($response->json() as $item) {
+                if (empty($item['document'])) {
+                    continue;
+                }
+
+                $document = $item['document'];
+                $fields = $document['fields'] ?? [];
+
+                $storagePath = $fields['storagePath']['stringValue'] ?? '';
+
+                if ($storagePath === '') {
+                    continue;
+                }
+
+                $results[$storagePath][] = [
+                    'id' => basename($document['name']),
+                    'word' => $fields['word']['stringValue'] ?? '',
+                    'letter' => $fields['letter']['stringValue'] ?? '',
+                    'fileName' => $fields['fileName']['stringValue'] ?? '',
+                    'storagePath' => $storagePath,
+                ];
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Lấy các document theo danh sách từ cần chuyển thành âm thanh.
+     * Mỗi truy vấn tối đa 30 từ.
+     */
+    public function getWordsByWords(array $words): array
+    {
+        $words = array_values(array_unique(array_filter(
+            array_map(
+                fn($word) => mb_strtolower(trim($word), 'UTF-8'),
+                $words
+            ),
+            fn($word) => $word !== ''
+        )));
+
+        if (empty($words)) {
+            return [];
+        }
+
+        $accessToken = $this->getAccessToken();
+        $url = "{$this->baseUrl}:runQuery";
+
+        $results = [];
+
+        foreach (array_chunk($words, 30) as $chunk) {
+            $values = array_map(
+                fn($word) => ['stringValue' => $word],
+                $chunk
+            );
+
+            $body = [
+                'structuredQuery' => [
+                    'from' => [
+                        ['collectionId' => 'words'],
+                    ],
+                    'where' => [
+                        'fieldFilter' => [
+                            'field' => [
+                                'fieldPath' => 'word',
+                            ],
+                            'op' => 'IN',
+                            'value' => [
+                                'arrayValue' => [
+                                    'values' => $values,
+                                ],
+                            ],
+                        ],
+                    ],
+                    'select' => [
+                        'fields' => [
+                            ['fieldPath' => 'word'],
+                            ['fieldPath' => 'letter'],
+                            ['fieldPath' => 'fileName'],
+                            ['fieldPath' => 'storagePath'],
+                        ],
+                    ],
+                ],
+            ];
+
+            $response = Http::withToken($accessToken)
+                ->connectTimeout(30)
+                ->timeout(60)
+                ->withOptions([
+                    'force_ip_resolve' => 'v4',
+                ])
+                ->post($url, $body);
+
+            if (!$response->successful()) {
+                throw new RuntimeException(
+                    'Firestore word query failed: ' . $response->body()
+                );
+            }
+
+            foreach ($response->json() as $item) {
+                if (empty($item['document'])) {
+                    continue;
+                }
+
+                $document = $item['document'];
+                $fields = $document['fields'] ?? [];
+
+                $word = mb_strtolower(
+                    trim($fields['word']['stringValue'] ?? ''),
+                    'UTF-8'
+                );
+
+                if ($word === '') {
+                    continue;
+                }
+
+                $results[] = [
+                    'id' => basename($document['name']),
+                    'word' => $word,
+                    'letter' => $fields['letter']['stringValue'] ?? '',
+                    'fileName' => $fields['fileName']['stringValue'] ?? '',
+                    'storagePath' => $fields['storagePath']['stringValue'] ?? '',
+                ];
+            }
+        }
+
+        return $results;
+    }
+
+
     /**
      * Tạo hồ sơ người dùng trong Firestore.
      */
@@ -196,5 +413,178 @@ class FirestoreService
                 'Cannot create user profile: ' . $response->body()
             );
         }
+    }
+    /**
+     * Tạo document từ mới trong collection words.
+     * Không ghi đè document đã tồn tại.
+     */
+    /**
+     * Tạo document từ mới trong Firestore.
+     * Không ghi đè document đã tồn tại.
+     */
+    public function createWord(
+        string $id,
+        string $word,
+        string $letter,
+        string $fileName,
+        string $storagePath
+    ): void {
+        $url = "{$this->baseUrl}/words?" . http_build_query([
+            'documentId' => $id,
+        ]);
+
+        $fields = [
+            'word' => ['stringValue' => $word],
+            'letter' => ['stringValue' => $letter],
+            'fileName' => ['stringValue' => $fileName],
+            'storagePath' => ['stringValue' => $storagePath],
+        ];
+
+        $response = Http::withToken($this->getAccessToken())
+            ->connectTimeout(30)
+            ->timeout(60)
+            ->withOptions([
+                'force_ip_resolve' => 'v4',
+            ])
+            ->post($url, [
+                'fields' => $fields,
+            ]);
+
+        if (!$response->successful()) {
+            throw new RuntimeException(
+                "Không thể tạo từ {$word}: " . $response->body()
+            );
+        }
+
+        Cache::forget('firestore.words.all');
+    }
+    public function getWordAudioFiles(array $document): array
+    {
+        $values = $document['fields']['audioFiles']['arrayValue']['values'] ?? [];
+
+        $result = [];
+
+        foreach ($values as $item) {
+            $fields = $item['mapValue']['fields'] ?? [];
+
+            $fileName = $fields['fileName']['stringValue'] ?? '';
+            $storagePath = $fields['storagePath']['stringValue'] ?? '';
+
+            if ($fileName !== '' && $storagePath !== '') {
+                $result[] = [
+                    'fileName' => $fileName,
+                    'storagePath' => $storagePath,
+                ];
+            }
+        }
+
+        return $result;
+    }
+    public function updateWordAudioFiles(
+        string $documentId,
+        array $audioFiles
+    ): void {
+        $url = "{$this->baseUrl}/words/" . rawurlencode($documentId);
+
+        $values = [];
+
+        foreach ($audioFiles as $audio) {
+            $values[] = [
+                'mapValue' => [
+                    'fields' => [
+                        'fileName' => [
+                            'stringValue' => $audio['fileName'],
+                        ],
+                        'storagePath' => [
+                            'stringValue' => $audio['storagePath'],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
+        $response = Http::withToken($this->getAccessToken())
+            ->connectTimeout(30)
+            ->timeout(60)
+            ->withOptions([
+                'force_ip_resolve' => 'v4',
+            ])
+            ->patch($url . '?' . http_build_query([
+                'updateMask.fieldPaths' => 'audioFiles',
+            ]), [
+                'fields' => [
+                    'audioFiles' => [
+                        'arrayValue' => [
+                            'values' => $values,
+                        ],
+                    ],
+                ],
+            ]);
+
+        if (!$response->successful()) {
+            throw new RuntimeException(
+                "Không thể cập nhật audioFiles cho {$documentId}: "
+                    . $response->body()
+            );
+        }
+
+        Cache::forget('firestore.words.all');
+    }
+    public function createWordWithAudioFiles(
+        string $id,
+        string $word,
+        string $letter,
+        array $audioFiles
+    ): void {
+        if (empty($audioFiles)) {
+            throw new RuntimeException('audioFiles không được rỗng.');
+        }
+
+        $first = $audioFiles[0];
+
+        $values = [];
+
+        foreach ($audioFiles as $audio) {
+            $values[] = [
+                'mapValue' => [
+                    'fields' => [
+                        'fileName' => [
+                            'stringValue' => $audio['fileName'],
+                        ],
+                        'storagePath' => [
+                            'stringValue' => $audio['storagePath'],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
+        $url = "{$this->baseUrl}/words?" . http_build_query([
+            'documentId' => $id,
+        ]);
+
+        $response = Http::withToken($this->getAccessToken())
+            ->timeout(60)
+            ->post($url, [
+                'fields' => [
+                    'word' => ['stringValue' => $word],
+                    'letter' => ['stringValue' => $letter],
+                    'fileName' => ['stringValue' => $first['fileName']],
+                    'storagePath' => ['stringValue' => $first['storagePath']],
+                    'audioFiles' => [
+                        'arrayValue' => [
+                            'values' => $values,
+                        ],
+                    ],
+                ],
+            ]);
+
+        if (!$response->successful()) {
+            throw new RuntimeException(
+                "Không thể tạo từ {$word}: " . $response->body()
+            );
+        }
+
+        Cache::forget('firestore.words.all');
     }
 }

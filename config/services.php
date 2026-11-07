@@ -39,8 +39,12 @@ return [
         'credentials' => env('FIREBASE_CREDENTIALS'),
     ],
     'supabase' => [
-    'url' => env('SUPABASE_URL'),
-    'bucket' => env('SUPABASE_BUCKET'),
-],
+        'url' => env('SUPABASE_URL'),
+        'bucket' => env('SUPABASE_BUCKET'),
+        'service_role_key' => env('SUPABASE_SERVICE_ROLE_KEY'),
+    ],
+        'audio' => [
+        'local_root' => env('AUDIO_LOCAL_ROOT', 'D:/Projects/HCSDLDPT/source'),
+    ],
 
 ];

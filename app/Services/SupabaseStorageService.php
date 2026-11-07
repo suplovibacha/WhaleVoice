@@ -72,4 +72,53 @@ class SupabaseStorageService
             );
         }
     }
+    public function uploadFile(
+        string $localPath,
+        string $filePath
+    ): array {
+        $key = config('services.supabase.service_role_key');
+
+        if (!$key) {
+            throw new RuntimeException('Supabase key is missing.');
+        }
+
+        if (!is_file($localPath)) {
+            throw new RuntimeException(
+                "Không tìm thấy file nguồn: {$localPath}"
+            );
+        }
+
+        $contents = file_get_contents($localPath);
+
+        if ($contents === false) {
+            throw new RuntimeException(
+                "Không đọc được file: {$localPath}"
+            );
+        }
+
+        $segments = array_map(
+            'rawurlencode',
+            explode('/', trim($filePath, '/'))
+        );
+
+        $encodedPath = implode('/', $segments);
+
+        $url = "{$this->baseUrl}/storage/v1/object/{$this->bucket}/{$encodedPath}";
+
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer {$key}",
+            'apikey' => $key,
+            'Content-Type' => 'audio/wav',
+            'x-upsert' => 'false',
+        ])
+            ->timeout(120)
+            ->withBody($contents, 'audio/wav')
+            ->post($url);
+
+        return [
+            'success' => $response->successful(),
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ];
+    }
 }

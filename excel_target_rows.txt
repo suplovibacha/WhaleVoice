@@ -1,0 +1,84 @@
+Sheet: Thiếu | Dong: 2
+Noi dung: cảm | cam3 | đĩa | d-ia4 | lứa | luua1 | vé | ve1
+File: d-ia4
+----------------------------------------------------------------------
+Sheet: Thiếu | Dong: 3
+Noi dung: cơ | coo0 | địa | d-ia5 | lựa | luua5
+File: d-ia5
+----------------------------------------------------------------------
+Sheet: Thiếu | Dong: 25
+Noi dung: dịch | dich5 | đưa | d-uua0 | lứt | luut1
+File: d-uua0
+----------------------------------------------------------------------
+Sheet: C | Dong: 239
+Noi dung: chàu | chau2
+File: hau2
+----------------------------------------------------------------------
+Sheet: Đ | Dong: 2
+Noi dung: đa | d-a0 | x | đồ | d-o+2 | x | đĩa | d-ia4 | x
+File: d-ia4
+----------------------------------------------------------------------
+Sheet: Đ | Dong: 3
+Noi dung: đà | d-a2 | x | đô | d-o+0 | x | địa | d-ia5 | x
+File: d-ia5
+----------------------------------------------------------------------
+Sheet: Đ | Dong: 25
+Noi dung: đần | d-a+n2 | x | đòn | d-on2 | x | đưa | d-uua0 | x
+File: d-uua0
+----------------------------------------------------------------------
+Sheet: H | Dong: 47
+Noi dung: 46 | hát | hat1 | x | 228 | hóng | hong1 | x
+File: hat1
+----------------------------------------------------------------------
+Sheet: H | Dong: 50
+Noi dung: 49 | hàu | hau2 | x | 231 | họp | hop5 | x
+File: hau2
+----------------------------------------------------------------------
+Sheet: H | Dong: 62
+Noi dung: 61 | hẳn | haan3 | x | 243 | hổi | ho+i3
+File: haan3
+----------------------------------------------------------------------
+Sheet: K | Dong: 43
+Noi dung: kếp | ke+p1 | khẳn | khaan3 | khoắng | khoaang1
+File: haan3
+----------------------------------------------------------------------
+Sheet: N | Dong: 30
+Noi dung: não | nao4 | x | ngăm | ngaam0 | x | ngon | ngon0 | x | nhát | nhat1 | x | nhóm | nhom1 | x | noi | noi0 | x
+File: hat1
+----------------------------------------------------------------------
+Sheet: N | Dong: 33
+Noi dung: nạp | nap5 | x | ngẳng | ngaang3 | x | ngọn | ngon5 | x | nhàu | nhau2 | x | nhọn | nhon5 | x | nói | noi1 | x
+File: hau2
+----------------------------------------------------------------------
+Sheet: N | Dong: 44
+Noi dung: năm | naam0 | x | ngẫng | nga+ng4 | x | ngộ | ngo+5 | x | nhẳn | nhaan3 | x | nhộn | nho+n5 | x | nóp | nop1 | x
+File: haan3
+----------------------------------------------------------------------
+Sheet: P | Dong: 4
+Noi dung: phá | pha1 | x | phắn | phaan1 | x | phân | pha+n0 | x | phen | phen0 | x | phế | phe+1 | x | phí | phi1 | x | phiên | phie+n0 | x | phó | pho1 | x | phố | pho+1 | x | phở | phoo3 | x | phú | phu1 | x | phứt | phuut1 | x
+File: phen0
+----------------------------------------------------------------------
+Sheet: P | Dong: 20
+Noi dung: phát | phat1 | x
+File: hat1
+----------------------------------------------------------------------
+Sheet: T | Dong: 161
+Noi dung: thát | that1 | x | tổng | to+ng3
+File: hat1
+----------------------------------------------------------------------
+Sheet: Q | Dong: 12
+Noi dung: quên | que+n0 | x | quết | que+t1 | x | quật | qua+t5 | x | quơ | quoo0 | x | quán | quan1 | x | quèn | quen2 | x | quặp | quaap5
+File: que+t1, qua+t5
+----------------------------------------------------------------------
+Sheet: Q | Dong: 14
+Noi dung: quây | qua+y0 | x | quốc | quo+c1 | x | quật | qua+t5 | x | quáng | quang1 | x | quều | que+u2 | x | quạo | quao5 | x
+File: qua+t5
+----------------------------------------------------------------------
+Sheet: Q | Dong: 23
+Noi dung: quết | que+t1 | x | quáp | quap1
+File: que+t1
+----------------------------------------------------------------------
+Sheet: S | Dong: 73
+Noi dung: sâu | sa+u0 | x | sòn | son2 | x | suyển | suye+n3 | x
+File: son2
+----------------------------------------------------------------------

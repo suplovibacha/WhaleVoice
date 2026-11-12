@@ -51,9 +51,28 @@ class LocalAudioController extends Controller
             abort(500, 'Không tìm thấy thư mục âm thanh.');
         }
 
-        $filePath = realpath(
-            $root . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $parts)
+        // Tim file theo duong dan mac dinh.
+$relativePath = implode(DIRECTORY_SEPARATOR, $parts);
+
+$filePath = realpath(
+    $root . DIRECTORY_SEPARATOR . $relativePath
+);
+
+// Neu khong tim thay file trong thu muc mac dinh,
+// thu tim trong thu muc D doi voi D_STROKE.
+if (
+    $filePath === false &&
+    str_starts_with($path, 'D_STROKE/')
+) {
+    $fallbackPath = $root
+        . DIRECTORY_SEPARATOR . 'D'
+        . DIRECTORY_SEPARATOR . implode(
+            DIRECTORY_SEPARATOR,
+            array_slice(explode('/', $path), 1)
         );
+
+    $filePath = realpath($fallbackPath);
+}
 
         // Kiểm tra file có thực sự nằm trong thư mục source.
         if (

@@ -70,8 +70,29 @@ Route::post('/tts/convert', function (
         }
 
         // Chỉ truy vấn những từ người dùng nhập.
-        $allWords = $firestore->getWordsByWords($tokenWords);
 
+        // Chuẩn hóa vị trí dấu thanh để nhận diện các cách viết tương đương.
+        $aliases = [
+            'hòa' => 'hoà',
+            'hỏa' => 'hoả',
+            'hoà' => 'hoà',
+            'hoả' => 'hoả',
+        ];
+
+        // Tạo danh sách từ cần truy vấn.
+        $lookupWords = [];
+
+        foreach ($tokenWords as $word) {
+            $lookupWords[] = $word;
+            $lookupWords[] = $aliases[$word] ?? $word;
+        }
+
+        $lookupWords = array_values(array_unique($lookupWords));
+
+        // Chỉ truy vấn các từ cần thiết trong Firestore.
+        $allWords = $firestore->getWordsByWords($lookupWords);
+
+        // Lập bản đồ theo đúng giá trị word lưu trong Firestore.
         $wordMap = collect($allWords)->keyBy(function ($item) {
             return mb_strtolower(
                 trim($item['word'] ?? ''),
@@ -104,12 +125,14 @@ Route::post('/tts/convert', function (
         $matchedWords = [];
 
         foreach ($tokenWords as $word) {
-            if (!$wordMap->has($word)) {
+            $lookupWord = $aliases[$word] ?? $word;
+
+            if (!$wordMap->has($lookupWord)) {
                 $missing[] = $word;
                 continue;
             }
 
-            $item = $wordMap->get($word);
+            $item = $wordMap->get($lookupWord);
             $storagePath = str_replace(
                 '\\',
                 '/',
@@ -145,7 +168,7 @@ Route::post('/tts/convert', function (
 
             $sourceFile = realpath(
                 $root . DIRECTORY_SEPARATOR .
-                implode(DIRECTORY_SEPARATOR, $parts)
+                    implode(DIRECTORY_SEPARATOR, $parts)
             );
 
             $rootPrefix = rtrim($root, DIRECTORY_SEPARATOR)
@@ -225,7 +248,6 @@ Route::post('/tts/convert', function (
                 'Content-Type' => 'audio/wav',
             ]
         );
-
     } catch (\Throwable $e) {
         report($e);
 
@@ -236,4 +258,3 @@ Route::post('/tts/convert', function (
         ], 500);
     }
 });
-
